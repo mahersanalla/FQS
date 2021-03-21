@@ -6,26 +6,24 @@
 #define BUF_SIZE 1024
 
 
-size_t sampleForSeconds(float delay_in_secs, char* dev_name, size_t pid, FILE* fptr);
-void printBuf(size_t buf[], FILE* fptr);
+
+//size_t sampleForSeconds(float delay_in_secs, char* dev_name, size_t pid, FILE* fptr);
+//void printBuf(size_t buf[], FILE* fptr);
 
 int main(int argc, char* argv[])
 { 
-	if (argc != 5)
+	if (argc != 3)
 	{
-		// Device name - pid number - Log file path - sampling time
-		printf("Must supply the following parametres in order: Device name - pid number - Log file path - sampling time \n");
+		// Device name - pid number
+		printf("Must supply the following parametres in order: Device name - pid number  \n");
 		return -1;
 	}
-	char** dummy_ptr;
-//	setNetDevice(argv[1], strtoul(argv[2], dummy_ptr, 10));
-	FILE *fptr;
-	fptr = fopen(argv[3],"w");
-	size_t sample_time = strtoul(argv[4], dummy_ptr, 10);
-  	printf("%ld\n", sampleForSeconds(sample_time, argv[1], strtoul(argv[2], dummy_ptr, 10), fptr));
-
-	fclose(fptr);	
-    return 0;
+//	char** dummy_ptr;	
+	setNetDevice(argv[1], strtol(argv[2], NULL, 10));	
+	m_stats s={0,0,0,0,0};
+	getQueueStats(&s);	
+   	printf("Stats are: QLen = %zu, drops=%zu, BLog=%zu, requeues=%zu, overlimits=%zu \n",s.qlen,s.drops,s.backlog,s.requeues,s.overlimits);
+        return 0;
 }
 
 /*
@@ -33,7 +31,7 @@ int main(int argc, char* argv[])
  * under the net that is defined over the given <pid>.
  * Return - the number of times that the Qdisc have been sampled.
  */
-size_t sampleForSeconds(float delay_in_secs, char* dev_name, size_t pid,FILE* fptr)
+/*size_t sampleForSeconds(float delay_in_secs, char* dev_name, size_t pid,FILE* fptr)
 {
     time_t start_time;
     time_t now;
@@ -69,3 +67,4 @@ void printBuf(size_t buf[],FILE* fptr)
 	
 	fwrite(file_buffer,sizeof(char),buffer_count,fptr);
 }
+*/

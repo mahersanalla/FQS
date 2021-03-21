@@ -1,4 +1,8 @@
 #include <stdio.h>
+
+
+
+typedef struct m_stats;
 //-- QOS interface between user space and kerenl space.
 
 /**
@@ -17,4 +21,5 @@ void setNetDevice(char* net_dev_name, size_t pid);
 		2. dev name could not been found
 		3. printQueueSize() were called before setNetDevice
  */
-int printQueueSize();
+
+int getQueueStats(m_stats* s);

@@ -65,7 +65,7 @@ def run():
 		net['router'].cmd("ifconfig router-client%d 192.168.%d.%d/24"%(i, i, i))
 	net['server'].cmd("tc qdisc add dev server-eth0 root pfifo_fast")
 	net['router'].cmd("tc qdisc add dev router-server root pfifo_fast")
-	net['router'].cmd("tc qdisc add dev router-server netem delay 500ms")
+	net['router'].cmd("tc qdisc add dev router-server netem delay 800ms")
 #	net['router'].cmd("tc qdisc add dev router-client root pfifo_fast")
 	for i in range(2, num_clients+1):
 		curr_client='client'+str(i)

@@ -1,4 +1,14 @@
 #include <stdio.h>
+#include <stdbool.h>
+#include <linux/gen_stats.h>
+typedef struct{
+	size_t	qlen;
+	size_t	backlog;
+	size_t	drops;
+	size_t	requeues;
+	size_t	overlimits;
+}m_stats;
+
 void setNetDevice(char* net_dev_name, size_t pid){
 	if(!net_dev_name) return;
 	//-- Trigger QOS module <set device> attribute.
@@ -14,18 +24,16 @@ void setNetDevice(char* net_dev_name, size_t pid){
 	return;
 }
 
-int printQueueSize(){
+int getQueueStats(m_stats* s){
 	FILE *fp1 = NULL;
-	int queue_size = -1;
-
 	//-- Trigger QOS module <get device queue size> attribute.
-	fp1= fopen ("/sys/kernel/QOSInfo/getQueueSize", "r");
+	fp1= fopen ("/sys/kernel/QOSInfo/getQueueStats", "r");
 	if(!fp1)
-	{
-		fprintf(stderr, "Error, falied Triggering <get queue size> attribute\n");
-		return -1;
+	{	
+		fprintf(stderr, "Error, falied Triggering <get queue stats> attribute\n");
+		return 0;
 	}
-	while( fscanf(fp1, "%d", &queue_size) == 1 ) { }
+	while( fscanf(fp1, "%zu %zu %zu %zu %zu", &s->qlen,&s->backlog,&s->drops,&s->requeues,&s->overlimits) == 5 ) { }
 	fclose(fp1);
-	return queue_size;
+	return 1;
 }

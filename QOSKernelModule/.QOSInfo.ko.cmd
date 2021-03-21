@@ -1,1 +1,0 @@
-cmd_/root/QOSProject/QOSKernelModule/QOSInfo.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id  -T ./scripts/module-common.lds -o /root/QOSProject/QOSKernelModule/QOSInfo.ko /root/QOSProject/QOSKernelModule/QOSInfo.o /root/QOSProject/QOSKernelModule/QOSInfo.mod.o;  true

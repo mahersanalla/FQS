@@ -9,11 +9,12 @@
 #include <linux/netdevice.h> //
 #include <linux/net_namespace.h>
 #include <net/sch_generic.h> //
-
+#include <linux/gen_stats.h>
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("ZUHERMAHER");
 char* program_name = "QOSQueueSizeProject";
 module_param(program_name,charp,S_IRUGO);
+
 
 //-- Some global variables for our usage.
 static struct kobject *glob_register_kobj;
@@ -24,10 +25,10 @@ static const int glob_error_value = -1;
 //-----------------------------------------
 //-- functionality that is added to kernel.
 //-----------------------------------------
-static ssize_t getQueueSize(struct kobject *kobj, struct kobj_attribute *attr,
-                      char *buf)
-{
-    struct net_device* dev;
+static ssize_t getQueueStats(struct kobject *kobj, struct kobj_attribute *attr,
+                         char *buf)
+{ 
+        struct net_device* dev;
 	struct Qdisc *curr_q;
 	int num_of_packets = 0;
 	struct net* the_net = get_net_ns_by_pid(glob_pid);
@@ -50,13 +51,27 @@ static ssize_t getQueueSize(struct kobject *kobj, struct kobj_attribute *attr,
 	    return 0;
 	}	
 	curr_q = dev->qdisc;
+	struct gnet_stats_queue curr_stats;
+	size_t backlog=0;
+	size_t requeues=0;
+	size_t overlimits=0;
+	size_t drops=0;
+	size_t qlen=0;
+
 	while (curr_q)
-	{
-		num_of_packets += curr_q->q.qlen;
+	{	
+		curr_stats = curr_q->qstats;
+		backlog += curr_stats.backlog;
+	    	requeues += curr_stats.requeues;
+       	 	overlimits += curr_stats.overlimits;
+        	drops += curr_stats.drops;
+        	qlen += curr_stats.qlen;
+		num_of_packets+=curr_q->q.qlen;		
 		curr_q = curr_q->next_sched;
+
 	}
 	read_unlock(&dev_base_lock);
-	return sprintf(buf, "%d\n", num_of_packets);
+	return sprintf(buf, "%zu %zu %zu %zu %zu\n", num_of_packets,backlog,drops,requeues,overlimits);
 }
 
 static ssize_t __used setDevice(struct kobject *kobj, struct kobj_attribute *attr,
@@ -78,12 +93,12 @@ static ssize_t __used setDevice(struct kobject *kobj, struct kobj_attribute *att
 static struct kobj_attribute glob_store_attribute =__ATTR(setDevice, 0220, NULL,
                                                      setDevice);
 //-- Getters
-static struct kobj_attribute glob_print_attribute =__ATTR(getQueueSize, 0660, getQueueSize,
+static struct kobj_attribute glob_get_attribute =__ATTR(getQueueStats, 0660, getQueueStats,
                                                      NULL);
 
 // -----------------------//
 static struct attribute *glob_register_attrs[] = {
-    &glob_print_attribute.attr,
+    &glob_get_attribute.attr,
     &glob_store_attribute.attr,
     NULL,   /* NULL terminate the list*/
 };
